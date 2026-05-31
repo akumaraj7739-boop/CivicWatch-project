@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicWatch - Open Source Citizen Issue Reporting & Community Alerts</title>
+    <meta name="description" content="Report local public issues, view realtime community alerts, track utility outages, and collaborate with neighbors to build a better community. Fully open source.">
+    
+    <!-- Premium Fonts from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Main Application Wrapper -->
+    <div class="app-container">
+        
+        <!-- Premium Header Bar -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-container" id="logoContainer">
+                    <span class="logo-icon"><i class="fa-solid fa-scale-balanced"></i></span>
+                    <span class="logo-text">Civic<span class="highlight">Watch</span></span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="search-bar-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="globalSearch" placeholder="Search by location or keywords (crime, flood, etc.)..." aria-label="Search posts">
+                    <button id="clearSearch" class="clear-search-btn" title="Clear search" style="display: none;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <!-- Notifications Bell -->
+                <button class="icon-badge-btn" id="notifBtn" title="View Alerts">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="badge" id="notifBadge">3</span>
+                </button>
+                
+                <!-- Create Post Action -->
+                <button class="primary-btn" id="createPostTrigger">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Create Post</span>
+                </button>
+                
+                <!-- User Profile Trigger -->
+                <div class="user-profile-menu">
+                    <button class="profile-avatar-btn" id="userMenuBtn" title="User Account">
+                        <span id="userAvatarText" class="avatar-initials"><i class="fa-regular fa-user"></i></span>
+                    </button>
+                    <!-- Dropdown Panel -->
+                    <div class="dropdown-panel" id="userDropdown">
+                        <div class="dropdown-header" id="dropdownHeader">
+                            <p class="user-name">Welcome, Citizen</p>
+                            <p class="user-sub">Log in to track reports</p>
+                        </div>
+                        <hr class="dropdown-divider">
+                        <div class="dropdown-body">
+                            <button class="dropdown-item" id="loginMenuBtn"><i class="fa-solid fa-sign-in-alt"></i> Login / Sign Up</button>
+                            <button class="dropdown-item" id="myAreaMenuBtn" style="display: none;"><i class="fa-solid fa-map-pin"></i> My Area Issues</button>
+                            <button class="dropdown-item logout-btn" id="logoutMenuBtn" style="display: none;"><i class="fa-solid fa-sign-out-alt"></i> Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace Layout -->
+        <main class="app-workspace">
+            
+            <!-- Left Navigation Sidebar -->
+            <aside class="left-sidebar">
+                <nav class="nav-menu">
+                    <button class="nav-item active" id="navHome">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Home</span>
+                    </button>
+                    <button class="nav-item" id="navMyArea">
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                        <span>My Area</span>
+                    </button>
+                    <button class="nav-item" id="navTrending">
+                        <i class="fa-solid fa-fire"></i>
+                        <span>Trending</span>
+                    </button>
+                    <button class="nav-item" id="navDashboard">
+                        <i class="fa-solid fa-chart-simple"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button class="nav-item" id="navVerified">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Verified Reports</span>
+                    </button>
+                    <button class="nav-item" id="navSettings">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Settings</span>
+                    </button>
+                </nav>
+                <div class="sidebar-footer">
+                    <p class="open-source-tag"><i class="fa-brands fa-github"></i> Open Source</p>
+                    <p class="copyright">© 2026 CivicWatch</p>
+                </div>
+            </aside>
+
+            <!-- Central Content Feed -->
+            <section class="central-feed" id="feedSection">
+                <!-- Feed Filter Indicator (e.g. "Showing Water Crisis") -->
+                <div class="filter-status-bar" id="filterStatusBar" style="display: none;">
+                    <span class="filter-msg">Showing: <strong id="currentFilterLabel">Water Crisis</strong></span>
+                    <button class="clear-filter-btn" id="clearFilterBtn"><i class="fa-solid fa-xmark"></i> Clear</button>
+                </div>
+
+                <!-- Live Posts Feed -->
+                <div class="posts-feed" id="postsFeedContainer">
+                    <!-- Cards injected by JS -->
+                    <div class="loading-state">
+                        <i class="fa-solid fa-circle-notch fa-spin spinner"></i>
+                        <p>Syncing civic database...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Widget Sidebar -->
+            <aside class="right-sidebar">
+                <!-- Trending Categories List Widget -->
+                <div class="widget-panel">
+                    <h3 class="widget-title"><i class="fa-solid fa-arrow-trend-up"></i> Trending Issues</h3>
+                    <ul class="trending-list" id="trendingCategoriesList">
+                        <!-- Seeded categories -->
+                        <li class="loading-inline">Syncing trends...</li>
+                    </ul>
+                </div>
+
+                <!-- Latest Alerts Broadcaster Widget -->
+                <div class="widget-panel">
+                    <div class="widget-title-row">
+                        <h3 class="widget-title"><i class="fa-solid fa-circle-exclamation"></i> Latest Alerts</h3>
+                        <button class="mini-alert-btn" id="broadcastAlertTrigger" title="Broadcast urgent warning">
+                            <i class="fa-solid fa-bullhorn"></i> Broadcast
+                        </button>
+                    </div>
+                    
+                    <div class="alerts-stack" id="alertsStackContainer">
+                        <!-- Alerts injected by JS -->
+                        <div class="loading-inline">Loading critical alerts...</div>
+                    </div>
+                </div>
+
+                <!-- Top Contributors List Widget -->
+                <div class="widget-panel">
+                    <h3 class="widget-title"><i class="fa-solid fa-medal"></i> Top Contributors</h3>
+                    <ol class="contributors-list" id="topContributorsList">
+                        <!-- Contributors injected by JS -->
+                        <li class="loading-inline">Ranking contributors...</li>
+                    </ol>
+                </div>
+            </aside>
+            
+        </main>
+    </div>
+
+    <!-- ================= MODALS LAYER ================= -->
+
+    <!-- 1. Authentication Modal (Login / Sign Up) -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-card auth-card animated-scale-up">
+            <button class="modal-close" id="closeAuthModal"><i class="fa-solid fa-xmark"></i></button>
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="loginTab">Login</button>
+                <button class="auth-tab" id="signupTab">Register</button>
+            </div>
+            
+            <div class="auth-forms">
+                <!-- Login form -->
+                <form id="loginForm" class="auth-form active">
+                    <div class="form-group">
+                        <label for="loginEmail">Email Address</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fa-regular fa-envelope input-icon"></i>
+                            <input type="email" id="loginEmail" placeholder="yourname@gmail.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fa-solid fa-lock input-icon"></i>
+                            <input type="password" id="loginPassword" placeholder="••••••••" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="auth-submit-btn">Continue</button>
+                    <p class="auth-error-msg" id="loginError"></p>
+                </form>
+
+                <!-- Signup form -->
+                <form id="signupForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="signupUsername">Username</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fa-regular fa-user input-icon"></i>
+                            <input type="text" id="signupUsername" placeholder="e.g. Rajesh Kumar" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email Address</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fa-regular fa-envelope input-icon"></i>
+                            <input type="email" id="signupEmail" placeholder="e.g. rajesh@example.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fa-solid fa-lock input-icon"></i>
+                            <input type="password" id="signupPassword" placeholder="Minimum 6 characters" minlength="6" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="auth-submit-btn">Create Free Account</button>
+                    <p class="auth-error-msg" id="signupError"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Create Post Modal -->
+    <div class="modal-overlay" id="createPostModal">
+        <div class="modal-card form-card animated-scale-up">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-bullhorn highlight-icon"></i> Report Civic Issue</h2>
+                <button class="modal-close" id="closePostModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="createPostForm" enctype="multipart/form-data">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="postTitle">Short Title / Incident</label>
+                        <input type="text" id="postTitle" placeholder="e.g. Multiple chain snatching incidents near station" required>
+                    </div>
+                    
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="postCategory">Category</label>
+                            <select id="postCategory" required>
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="Water Crisis">Water Crisis</option>
+                                <option value="Power Outage">Power Outage</option>
+                                <option value="Street Lighting">Street Lighting</option>
+                                <option value="Crime">Crime / Safety</option>
+                                <option value="Road Damage">Road Damage</option>
+                                <option value="Waste Disposal">Waste Disposal</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="postLocation">Location</label>
+                            <input type="text" id="postLocation" placeholder="e.g. Sitamarhi, Bihar" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="postDescription">Detailed Description</label>
+                        <textarea id="postDescription" rows="4" placeholder="Describe the issue in detail, duration, and details for authority action..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Issue Media (Upload Photo or Video)</label>
+                        <div class="drag-drop-zone" id="imageDragZone">
+                            <input type="file" id="postImage" accept="image/*,video/*" class="file-input-hidden">
+                            <div class="drag-content" id="dragZoneText">
+                                <i class="fa-solid fa-cloud-arrow-up cloud-icon"></i>
+                                <p class="drag-main">Drag and drop file or <span class="browse-link">browse</span></p>
+                                <p class="drag-sub">Images or MP4/WEBM video up to 50MB</p>
+                            </div>
+                            <div class="drag-preview" id="imagePreviewContainer" style="display: none;">
+                                <img id="uploadedImagePreview" src="" alt="Selected Preview">
+                                <video id="uploadedVideoPreview" src="" style="display: none; max-width: 100%; max-height: 180px; border-radius: var(--border-radius-sm);" autoplay muted loop></video>
+                                <button type="button" class="remove-preview-btn" id="removeImageBtn"><i class="fa-solid fa-trash-can"></i> Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <p class="form-submit-error" id="postSubmitError"></p>
+                    <button type="button" class="secondary-btn" id="cancelPostBtn">Cancel</button>
+                    <button type="submit" class="primary-btn submit-btn" id="submitPostBtn">Publish Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. Broadcast Alert Modal -->
+    <div class="modal-overlay" id="broadcastAlertModal">
+        <div class="modal-card alert-form-card animated-scale-up">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-triangle-exclamation warning-icon"></i> Broadcast Community Alert</h2>
+                <button class="modal-close" id="closeAlertModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="broadcastAlertForm">
+                <div class="form-group">
+                    <label for="alertTitle">Alert Heading</label>
+                    <input type="text" id="alertTitle" placeholder="e.g. Flash flood warning or severe weather" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="alertRisk">Risk Level</label>
+                    <select id="alertRisk" required>
+                        <option value="info">Info (Blue - General Event)</option>
+                        <option value="warning">Warning (Yellow - Maintenance/Notice)</option>
+                        <option value="high">Critical (Red - Severe Hazard/Danger)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="alertDescription">Alert Description</label>
+                    <textarea id="alertDescription" rows="3" placeholder="Briefly describe the emergency details, instructions, and duration..." required></textarea>
+                </div>
+                
+                <div class="modal-footer">
+                    <p class="form-submit-error" id="alertSubmitError"></p>
+                    <button type="button" class="secondary-btn" id="cancelAlertBtn">Cancel</button>
+                    <button type="submit" class="primary-btn alert-submit-btn">Broadcast Alert</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. Post Details & Comments Modal (Dynamic Modal Drawer) -->
+    <div class="modal-overlay" id="postDetailsModal">
+        <div class="modal-card details-card animated-scale-up">
+            <button class="modal-close" id="closeDetailsModal"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="details-content" id="detailsModalContent">
+                <!-- Loaded dynamically by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Frontend Core Scripts -->
+    <script src="/js/app.js"></script>
+</body>
+</html>
